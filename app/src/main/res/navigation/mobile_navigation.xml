@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/navigation_calculate">
+
+    <fragment
+        android:id="@+id/navigation_calculate"
+        android:name="com.hamelers.gratuity.ui.calculate.CalculateFragment"
+        android:label="@string/title_calculate"
+        tools:layout="@layout/fragment_calculate" />
+
+    <fragment
+        android:id="@+id/navigation_history"
+        android:name="com.hamelers.gratuity.ui.history.HistoryFragment"
+        android:label="@string/title_history"
+        tools:layout="@layout/fragment_history" />
+</navigation>

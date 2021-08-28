@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">gratuity</string>
+    <string name="title_calculate">Calculate</string>
+    <string name="title_history">History</string>
+</resources>
