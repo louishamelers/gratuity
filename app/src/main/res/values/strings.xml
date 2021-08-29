@@ -1,5 +1,11 @@
 <resources>
-    <string name="app_name">gratuity</string>
-    <string name="title_calculate">Calculate</string>
-    <string name="title_history">History</string>
+    <string name="app_name">Gratuity</string>
+    <string name="amount_label">Amount</string>
+    <string name="left_tip_button">14%</string>
+    <string name="center_tip_button">21%</string>
+    <string name="right_tip_button">28%</string>
+    <string name="tip_percentage_label">Tip percentage</string>
+    <string name="final_amount_label">Amount</string>
+    <string name="final_tip_label">Tip</string>
+    <string name="final_total_label">Total</string>
 </resources>
