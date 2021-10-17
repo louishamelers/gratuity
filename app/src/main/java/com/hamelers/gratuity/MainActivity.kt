@@ -1,6 +1,8 @@
 package com.hamelers.gratuity
 
 import android.animation.AnimatorListenerAdapter
+import android.annotation.SuppressLint
+import android.content.Context
 import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
@@ -16,11 +18,9 @@ import com.hamelers.gratuity.databinding.ActivityMainBinding
 import java.text.NumberFormat
 
 import android.content.SharedPreferences
-
-
-
-
-
+import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 
 
 class MainActivity : AppCompatActivity() {
@@ -76,6 +76,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val onTextTouchListener: View.OnTouchListener = object: View.OnTouchListener {
+        override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
+            val imm: InputMethodManager =
+                getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(p0, InputMethodManager.SHOW_IMPLICIT)
+            return true
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.supportActionBar?.hide()
@@ -85,6 +95,7 @@ class MainActivity : AppCompatActivity() {
         binding.amountEditInput.requestFocus()
         binding.amountEditInput.addTextChangedListener(textWatcher)
         binding.amountEditInput.text = SpannableStringBuilder(formatToCurrency(0))
+        binding.amountEditInput.setOnTouchListener(onTextTouchListener)
 
         binding.tipPercentage.check(binding.centerButton.id)
         binding.tipPercentage.isSelectionRequired = true
