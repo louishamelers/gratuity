@@ -1,26 +1,20 @@
 package com.hamelers.gratuity
 
-import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
 import android.content.Context
-import android.opengl.Visibility
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.TextView
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.hamelers.gratuity.databinding.ActivityMainBinding
 import java.text.NumberFormat
-
-import android.content.SharedPreferences
-import android.view.KeyEvent
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -43,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             if (s.toString() != current) {
                 binding.amountEditInput.removeTextChangedListener(this)
 
-                val cleanString: String = s.replace("[^0-9]".toRegex(), "")
+                val cleanString: String = s.replace("\\D".toRegex(), "")
 
                 val parsed = cleanString.toDouble()
                 amount = parsed.toInt()
@@ -70,20 +64,15 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    private val onMoreClickListener: View.OnClickListener = object: View.OnClickListener{
-        override fun onClick(p0: View?) {
-            toggleMoreOptions()
-        }
-    }
+    private val onMoreClickListener: View.OnClickListener = View.OnClickListener { toggleMoreOptions() }
 
-    private val onTextTouchListener: View.OnTouchListener = object: View.OnTouchListener {
-        override fun onTouch(p0: View?, p1: MotionEvent?): Boolean {
+    private val onTextTouchListener: View.OnTouchListener =
+        View.OnTouchListener { p0, _ ->
             val imm: InputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(p0, InputMethodManager.SHOW_IMPLICIT)
-            return true
+            true
         }
-    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -141,7 +130,7 @@ class MainActivity : AppCompatActivity() {
         binding.finalAmount.text = formatToCurrency(amount)
         binding.finalTip.text = formatToCurrency(amount*tipPercentage/100)
         binding.finalTotal.text = formatToCurrency(amount + (amount*tipPercentage/100))
-        binding.specificTip.text = tipPercentage.toString() + "%"
+        binding.specificTip.text = "$tipPercentage%"
     }
 
     private fun formatToCurrency(parsed: Int): String {
@@ -156,8 +145,7 @@ class MainActivity : AppCompatActivity() {
             binding.specificPercentageContainer.animate()
                 .alpha(1f)
                 .setInterpolator(AccelerateDecelerateInterpolator())
-                .setStartDelay(50)
-                .setDuration(250)
+                .setStartDelay(50).duration = 250
             binding.moreTips.text = "done"
         } else {
             binding.specificPercentageContainer.visibility = View.INVISIBLE
@@ -166,8 +154,7 @@ class MainActivity : AppCompatActivity() {
             binding.tipPercentage.animate()
                 .alpha(1f)
                 .setInterpolator(AccelerateDecelerateInterpolator())
-                .setStartDelay(50)
-                .setDuration(250)
+                .setStartDelay(50).duration = 250
             binding.moreTips.text = "edit"
         }
         collapsed = !collapsed
@@ -185,23 +172,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadPercentages() {
         percentages = arrayOf(14,21,28)
-//        Log.d("percentages", percentages.toString())
-//        val defaults = arrayOf(14,21,28)
 //        val sharedPreferences = getPreferences(MODE_PRIVATE)
-//        val loose = sharedPreferences.getString("percentages", "")
+//        val percentagesAsString = sharedPreferences.getString("percentages", "14,21,28")
+//        Log.d("kak", percentagesAsString.toString())
+//        val tokenizer = StringTokenizer(percentagesAsString, ",")
 //        for (i in 0..2) {
-//            val value = if(loose[i]) loose[i] else defaults[i]
-//            percentages[i] = Integer.parseInt(loose[i])
+//            Log.d("perc", tokenizer.nextToken())
+////            percentages[i] = Integer.parseInt(tokenizer.nextToken())
 //        }
+//        Log.d("load", percentages.toString())
     }
 
     private fun savePercentages() {
         binding.leftButton.text = percentages[0].toString()
         binding.centerButton.text = percentages[1].toString()
         binding.rightButton.text = percentages[2].toString()
-//        val sharedPreferences = getPreferences(MODE_PRIVATE)
-//        val editor: SharedPreferences.Editor = sharedPreferences.edit()
-//        editor.putString("percentages", percentages.toString())
-//        editor.commit()
+        savePercentagesToSharedPrefs()
+    }
+
+    private fun savePercentagesToSharedPrefs() {
+        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        val prefsString = StringBuilder()
+        for (i in percentages) {
+            prefsString.append(i).append(",")
+        }
+        editor.putString("percentages", percentages.toString())
+        editor.commit()
     }
 }
