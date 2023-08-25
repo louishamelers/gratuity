@@ -58,12 +58,8 @@ class MainActivity : AppCompatActivity() {
         override fun afterTextChanged(p0: Editable?) {
         }
     }
-    private val toggleWatcher: MaterialButtonToggleGroup.OnButtonCheckedListener = object: MaterialButtonToggleGroup.OnButtonCheckedListener {
-        override fun onButtonChecked(materialButtonToggleGroup: MaterialButtonToggleGroup, i: Int, b: Boolean) {
-            setButtonPercentageValue(i)
-        }
-
-    }
+    private val toggleWatcher: MaterialButtonToggleGroup.OnButtonCheckedListener =
+        MaterialButtonToggleGroup.OnButtonCheckedListener { _, i, _ -> setButtonPercentageValue(i) }
     private val onMoreClickListener: View.OnClickListener = View.OnClickListener { toggleMoreOptions() }
 
     private val onTextTouchListener: View.OnTouchListener =
@@ -78,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.supportActionBar?.hide()
+
+        loadPercentages()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -94,8 +92,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.moreTips.setOnClickListener(onMoreClickListener)
 
-        loadPercentages()
-        savePercentages()
         binding.percentagePlus.setOnClickListener {
             val selectedPercentage:Int = when (binding.tipPercentage.checkedButtonId) {
                 binding.leftButton.id -> 0
@@ -124,6 +120,7 @@ class MainActivity : AppCompatActivity() {
 
 
         setContentView(binding.root)
+        savePercentages()
     }
 
     private fun calculateTip() {
@@ -138,7 +135,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleMoreOptions() {
-        if (collapsed) {
+        if (collapsed) { // Show specific tip editor
             binding.tipPercentage.visibility = View.INVISIBLE
             binding.specificPercentageContainer.alpha = 0f
             binding.specificPercentageContainer.visibility = View.VISIBLE
@@ -147,7 +144,7 @@ class MainActivity : AppCompatActivity() {
                 .setInterpolator(AccelerateDecelerateInterpolator())
                 .setStartDelay(50).duration = 250
             binding.moreTips.text = "done"
-        } else {
+        } else { // Hide specific tip editor
             binding.specificPercentageContainer.visibility = View.INVISIBLE
             binding.tipPercentage.alpha = 0f
             binding.tipPercentage.visibility = View.VISIBLE
@@ -163,41 +160,41 @@ class MainActivity : AppCompatActivity() {
 
     private fun setButtonPercentageValue(id: Int) {
         when (id) {
-            binding.leftButton.id -> tipPercentage = 14
-            binding.centerButton.id -> tipPercentage = 21
-            binding.rightButton.id -> tipPercentage = 28
+            binding.leftButton.id -> tipPercentage = percentages[0]
+            binding.centerButton.id -> tipPercentage = percentages[1]
+            binding.rightButton.id -> tipPercentage = percentages[2]
         }
         calculateTip()
     }
 
     private fun loadPercentages() {
-        percentages = arrayOf(14,21,28)
-//        val sharedPreferences = getPreferences(MODE_PRIVATE)
-//        val percentagesAsString = sharedPreferences.getString("percentages", "14,21,28")
-//        Log.d("kak", percentagesAsString.toString())
-//        val tokenizer = StringTokenizer(percentagesAsString, ",")
-//        for (i in 0..2) {
-//            Log.d("perc", tokenizer.nextToken())
-////            percentages[i] = Integer.parseInt(tokenizer.nextToken())
-//        }
-//        Log.d("load", percentages.toString())
+        val sharedPreferences = getPreferences(MODE_PRIVATE)
+        val leftButtonPercentage = sharedPreferences.getInt("leftPercentage", 14)
+        val centerButtonPercentage = sharedPreferences.getInt("centerPercentage", 21)
+        val rightButtonPercentage = sharedPreferences.getInt("rightPercentage", 28)
+        percentages[0] = leftButtonPercentage
+        percentages[1] = centerButtonPercentage
+        percentages[2] = rightButtonPercentage
     }
 
     private fun savePercentages() {
-        binding.leftButton.text = percentages[0].toString()
-        binding.centerButton.text = percentages[1].toString()
-        binding.rightButton.text = percentages[2].toString()
+        binding.leftButton.text = percentages[0].toString() + "%"
+        binding.centerButton.text = percentages[1].toString() + "%"
+        binding.rightButton.text = percentages[2].toString() + "%"
         savePercentagesToSharedPrefs()
     }
 
     private fun savePercentagesToSharedPrefs() {
         val sharedPreferences = getPreferences(MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
-        val prefsString = StringBuilder()
-        for (i in percentages) {
-            prefsString.append(i).append(",")
-        }
-        editor.putString("percentages", percentages.toString())
-        editor.commit()
+//        val prefsString = StringBuilder()
+//        for (i in percentages) {
+//            prefsString.append(i).append(",")
+//        }
+        editor.putInt("leftPercentage", percentages[0])
+        editor.putInt("centerPercentage", percentages[1])
+        editor.putInt("rightPercentage", percentages[2])
+//        editor.putString("percentages", percentages.toString())
+        editor.apply()
     }
 }
