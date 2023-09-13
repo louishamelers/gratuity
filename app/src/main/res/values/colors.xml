@@ -1,3 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="primary">@color/green_500</color>
+    <color name="primaryVariant">@color/green_700</color>
+    <color name="secondary">@color/teal_200</color>
+    <color name="secondaryVariant">@color/teal_700</color>
 </resources>
