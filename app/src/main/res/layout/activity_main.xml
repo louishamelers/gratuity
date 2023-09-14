@@ -11,11 +11,23 @@
         android:animateLayoutChanges="true"
         android:paddingBottom="28dp">
 
+        <View
+            android:id="@+id/definition_toucher"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/definition_container"
+            />
+
         <TextView
             android:id="@+id/app_title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/medium"
+            android:layout_marginTop="@dimen/medium"
+            android:layout_marginBottom="@dimen/medium"
+            android:layout_marginStart="@dimen/medium"
             android:animateLayoutChanges="true"
             android:fontFamily="sans-serif"
             android:gravity="start"
@@ -24,6 +36,19 @@
             android:textSize="32sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/icon_info"
+            android:layout_height="24dp"
+            android:layout_width="24dp"
+            android:layout_marginTop="@dimen/medium"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/app_title"
+            android:animateLayoutChanges="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_info"
+            android:gravity="center_horizontal"
+            android:padding="5dip"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/definition_container"
@@ -96,25 +121,38 @@
                 android:text="@string/definition_value_2"
                 app:layout_constraintStart_toEndOf="@id/definition_number_2"
                 app:layout_constraintTop_toBottomOf="@id/definition_value_1"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-<!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/close_definition_button"-->
-<!--                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"-->
-<!--                android:layout_width="52dp"-->
-<!--                android:layout_height="52dp"-->
-<!--                android:layout_margin="@dimen/medium"-->
-<!--                android:insetLeft="0dp"-->
-<!--                android:insetTop="0dp"-->
-<!--                android:insetRight="0dp"-->
-<!--                android:insetBottom="0dp"-->
-<!--                app:icon="@drawable/ic_expand_less"-->
-<!--                app:iconGravity="textStart"-->
-<!--                app:iconPadding="0dp"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@id/definition_value_2" />-->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/request_review_button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                app:layout_constrainedWidth="true"
+                android:layout_margin="@dimen/medium"
+                app:icon="@drawable/ic_rate_review"
+                android:text="@string/give_us_a_review"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/close_definition_button"
+                app:layout_constraintTop_toBottomOf="@id/definition_value_2" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/close_definition_button"
+                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_margin="@dimen/medium"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                app:icon="@drawable/ic_expand_less"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/definition_value_2" />
 
             <View
                 android:layout_width="match_parent"

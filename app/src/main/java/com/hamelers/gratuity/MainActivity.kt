@@ -1,7 +1,5 @@
 package com.hamelers.gratuity
 
-import android.animation.LayoutTransition
-import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -10,14 +8,15 @@ import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.transition.TransitionManager
-import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.play.core.review.ReviewException
+import com.google.android.play.core.review.ReviewManagerFactory
+import com.google.android.play.core.review.model.ReviewErrorCode
 import com.hamelers.gratuity.databinding.ActivityMainBinding
 import java.text.NumberFormat
 import java.util.*
@@ -80,11 +79,12 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-    private val onDefinitionTouchListener: View.OnTouchListener = View.OnTouchListener { view, event ->
-        if (event.action == MotionEvent.ACTION_DOWN) toggleDefinition()
-        view.performClick()
-        true
-    }
+    private val onDefinitionTouchListener: View.OnTouchListener =
+        View.OnTouchListener { view, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) toggleDefinition()
+            view.performClick()
+            true
+        }
 
     private val percentagePlusClickListener: View.OnClickListener = View.OnClickListener {
         val selectedPercentage: Int = when (binding.tipPercentage.checkedButtonId) {
@@ -121,9 +121,10 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
-        binding.appTitle.setOnTouchListener(onDefinitionTouchListener)
+        binding.definitionToucher.setOnTouchListener(onDefinitionTouchListener)
         binding.definitionContainer.setOnTouchListener(onDefinitionTouchListener)
-        binding.definitionContainer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.closeDefinitionButton.setOnClickListener { toggleDefinition() }
+        binding.requestReviewButton.setOnClickListener { requestReview() }
 
         binding.amountEditInput.requestFocus()
         binding.amountEditInput.addTextChangedListener(textWatcher)
@@ -140,8 +141,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.percentagePlus.setOnClickListener(percentagePlusClickListener)
         binding.percentageMinus.setOnClickListener(percentageMinusClickListener)
-
-
 
         setContentView(binding.root)
         savePercentages()
@@ -163,13 +162,38 @@ class MainActivity : AppCompatActivity() {
 
         if (definitionCollapsed) {
             binding.definitionContainer.visibility = View.VISIBLE
-//            binding.appTitle.gravity = Gravity.START
+            binding.amountEditInput.clearFocus()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.hideSoftInputFromWindow(binding.amountEditInput.windowToken, 0)
         } else {
             binding.definitionContainer.visibility = View.GONE
-//            binding.appTitle.gravity = Gravity.CENTER
+            binding.amountEditInput.requestFocus()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm?.showSoftInput(binding.amountEditInput, 0)
         }
 
         definitionCollapsed = !definitionCollapsed
+    }
+
+    private fun requestReview() {
+        val manager = ReviewManagerFactory.create(this)
+        val request = manager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // We got the ReviewInfo object
+                val reviewInfo = task.result
+                val flow = manager.launchReviewFlow(this, reviewInfo)
+                flow.addOnCompleteListener { _ ->
+                    // The flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even whether the review dialog was shown. Thus, no
+                    // matter the result, we continue our app flow.
+                }
+            } else {
+                // There was some problem, log or handle the error code.
+                @ReviewErrorCode val reviewErrorCode =
+                    (task.getException() as ReviewException).errorCode
+            }
+        }
     }
 
     private fun toggleMoreOptions() {
@@ -225,14 +249,11 @@ class MainActivity : AppCompatActivity() {
     private fun savePercentagesToSharedPrefs() {
         val sharedPreferences = getPreferences(MODE_PRIVATE)
         val editor: SharedPreferences.Editor = sharedPreferences.edit()
-//        val prefsString = StringBuilder()
-//        for (i in percentages) {
-//            prefsString.append(i).append(",")
-//        }
+
         editor.putInt("leftPercentage", percentages[0])
         editor.putInt("centerPercentage", percentages[1])
         editor.putInt("rightPercentage", percentages[2])
-//        editor.putString("percentages", percentages.toString())
+
         editor.apply()
     }
 }
