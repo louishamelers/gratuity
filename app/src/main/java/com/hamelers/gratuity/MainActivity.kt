@@ -1,5 +1,7 @@
 package com.hamelers.gratuity
 
+import android.animation.LayoutTransition
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -7,6 +9,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.transition.TransitionManager
+import android.util.Log
+import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
@@ -23,9 +29,10 @@ class MainActivity : AppCompatActivity() {
     private var amount: Int = 0
     private var tipPercentage: Int = 0
     private var collapsed = true
-    private var percentages = arrayOf<Int>(0,0,0)
+    private var percentages = arrayOf<Int>(0, 0, 0)
+    private var definitionCollapsed = true
 
-    private val textWatcher: TextWatcher = object: TextWatcher {
+    private val textWatcher: TextWatcher = object : TextWatcher {
         private var current: String = ""
 
         override fun onTextChanged(
@@ -60,15 +67,50 @@ class MainActivity : AppCompatActivity() {
     }
     private val toggleWatcher: MaterialButtonToggleGroup.OnButtonCheckedListener =
         MaterialButtonToggleGroup.OnButtonCheckedListener { _, i, _ -> setButtonPercentageValue(i) }
-    private val onMoreClickListener: View.OnClickListener = View.OnClickListener { toggleMoreOptions() }
+
+    private val onMoreClickListener: View.OnClickListener =
+        View.OnClickListener { toggleMoreOptions() }
 
     private val onTextTouchListener: View.OnTouchListener =
         View.OnTouchListener { p0, _ ->
             val imm: InputMethodManager =
                 getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(p0, InputMethodManager.SHOW_IMPLICIT)
+            p0.performClick()
             true
         }
+
+    private val onDefinitionTouchListener: View.OnTouchListener = View.OnTouchListener { view, event ->
+        if (event.action == MotionEvent.ACTION_DOWN) toggleDefinition()
+        view.performClick()
+        true
+    }
+
+    private val percentagePlusClickListener: View.OnClickListener = View.OnClickListener {
+        val selectedPercentage: Int = when (binding.tipPercentage.checkedButtonId) {
+            binding.leftButton.id -> 0
+            binding.centerButton.id -> 1
+            binding.rightButton.id -> 2
+            else -> 0
+        }
+        percentages[selectedPercentage]++
+        tipPercentage++
+        calculateTip()
+        savePercentages()
+    }
+
+    private val percentageMinusClickListener: View.OnClickListener = View.OnClickListener {
+        val selectedPercentage: Int = when (binding.tipPercentage.checkedButtonId) {
+            binding.leftButton.id -> 0
+            binding.centerButton.id -> 1
+            binding.rightButton.id -> 2
+            else -> 0
+        }
+        percentages[selectedPercentage]--
+        tipPercentage--
+        calculateTip()
+        savePercentages()
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +120,10 @@ class MainActivity : AppCompatActivity() {
         loadPercentages()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        binding.appTitle.setOnTouchListener(onDefinitionTouchListener)
+        binding.definitionContainer.setOnTouchListener(onDefinitionTouchListener)
+        binding.definitionContainer.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         binding.amountEditInput.requestFocus()
         binding.amountEditInput.addTextChangedListener(textWatcher)
@@ -92,30 +138,8 @@ class MainActivity : AppCompatActivity() {
 
         binding.moreTips.setOnClickListener(onMoreClickListener)
 
-        binding.percentagePlus.setOnClickListener {
-            val selectedPercentage:Int = when (binding.tipPercentage.checkedButtonId) {
-                binding.leftButton.id -> 0
-                binding.centerButton.id -> 1
-                binding.rightButton.id -> 2
-                else -> 0
-            }
-            percentages[selectedPercentage]++
-            tipPercentage++
-            calculateTip()
-            savePercentages()
-        }
-        binding.percentageMinus.setOnClickListener {
-            val selectedPercentage:Int = when (binding.tipPercentage.checkedButtonId) {
-                binding.leftButton.id -> 0
-                binding.centerButton.id -> 1
-                binding.rightButton.id -> 2
-                else -> 0
-            }
-            percentages[selectedPercentage]--
-            tipPercentage--
-            calculateTip()
-            savePercentages()
-        }
+        binding.percentagePlus.setOnClickListener(percentagePlusClickListener)
+        binding.percentageMinus.setOnClickListener(percentageMinusClickListener)
 
 
 
@@ -125,13 +149,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun calculateTip() {
         binding.finalAmount.text = formatToCurrency(amount)
-        binding.finalTip.text = formatToCurrency(amount*tipPercentage/100)
-        binding.finalTotal.text = formatToCurrency(amount + (amount*tipPercentage/100))
+        binding.finalTip.text = formatToCurrency(amount * tipPercentage / 100)
+        binding.finalTotal.text = formatToCurrency(amount + (amount * tipPercentage / 100))
         binding.specificTip.text = "$tipPercentage%"
     }
 
     private fun formatToCurrency(parsed: Int): String {
-        return NumberFormat.getCurrencyInstance().format((parsed.toDouble()/100))
+        return NumberFormat.getCurrencyInstance().format((parsed.toDouble() / 100))
+    }
+
+    private fun toggleDefinition() {
+        TransitionManager.beginDelayedTransition(binding.definitionContainer)
+
+        if (definitionCollapsed) {
+            binding.definitionContainer.visibility = View.VISIBLE
+//            binding.appTitle.gravity = Gravity.START
+        } else {
+            binding.definitionContainer.visibility = View.GONE
+//            binding.appTitle.gravity = Gravity.CENTER
+        }
+
+        definitionCollapsed = !definitionCollapsed
     }
 
     private fun toggleMoreOptions() {

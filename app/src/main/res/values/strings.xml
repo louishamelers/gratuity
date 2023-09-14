@@ -8,4 +8,14 @@
     <string name="final_amount_label">Amount</string>
     <string name="final_tip_label">Tip</string>
     <string name="final_total_label">Total</string>
+    <string name="sound_groups">gra·​tu·​i·​ty</string>
+    <string name="pronunciation">/grə-ˈtü-ə-tē/</string>
+    <string name="definition">
+      <li>1. a gift of money, over and above payment due for service, as to a waiter or bellhop; tip.</li>\n
+      <li>2. something given without claim or demand.</li>\n
+    </string>
+    <string name="definition_number_1">1.</string>
+    <string name="definition_number_2">2.</string>
+    <string name="definition_value_1">a gift of money, over and above payment due for service, as to a waiter or bellhop; tip.</string>
+    <string name="definition_value_2">something given without claim or demand.</string>
 </resources>
